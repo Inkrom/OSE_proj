@@ -5,6 +5,8 @@ OneWire onewire(ONEWIRE_PIN);
 const char MESSAGE_LENGTH = 16;
 char incomingMessage[MESSAGE_LENGTH];
 char outgoingMessage[MESSAGE_LENGTH];
+const byte ERROR_BYTE = byte(0xFF);
+const byte SUCCESS_BYTE = byte(0x01);
 
 void setup() 
 {
@@ -43,11 +45,11 @@ void handleSerial()
           if (incomingMessage[1] != '\0') 
           {
             onewire.write_bit(uint8_t(incomingMessage[1]));
-            Serial.write(byte(0x01));
+            Serial.write(SUCCESS_BYTE);
           }
           else 
           {
-            Serial.write(byte(0xFF));
+            Serial.write(ERROR_BYTE);
           }
       }
       break;
@@ -70,7 +72,7 @@ void handleSerial()
             Serial.write(incomingMessage[1]);
           }
           else 
-            Serial.write(byte(0xFF));
+            Serial.write());
       }
       break;
 
@@ -80,15 +82,15 @@ void handleSerial()
         //Serial.print(strlen(incomingMessage)); // DEBUG PURPOSES
         if (strlen(incomingMessage) == 2)
         {
-          if (incomingMessage[1] < 14) 
+          if (incomingMessage[1] <= 14) 
           {
             onewire.write_bytes((const uint8_t*)incomingMessage+2, incomingMessage[1], false);
           }
           else 
-            Serial.write(byte(0xFF));
+            Serial.write(ERROR_BYTE);
         }
         else 
-          Serial.write(byte(0xFF));
+          Serial.write(ERROR_BYTE);
       }
       break;
 
@@ -110,13 +112,13 @@ void handleSerial()
           {
             onewire.read_bytes(outgoingMessage, uint16_t(incomingMessage[1]));
             Serial.write(outgoingMessage, incomingMessage[1]);
-            Serial.write(byte(0x01));
+            Serial.write(SUCCESS_BYTE);
           }
           else
-            Serial.write(byte(0xFF));
+            Serial.write(ERROR_BYTE);
         }
         else
-          Serial.write(byte(0xFF));
+          Serial.write(ERROR_BYTE);
       }
       break;
 
@@ -128,12 +130,11 @@ void handleSerial()
             char rom[8];
               for (int i = 0; i < strlen(rom); i++) rom[i] = '\0';
             strncpy(rom, incomingMessage+1, 8);
+            Serial.write(SUCCESS_BYTE);
             onewire.select(rom);
-            Serial.write(byte(0x01));
-
           }
           else
-            Serial.write(byte(0xFF));
+            Serial.write(ERROR_BYTE);
       }
       break;
 
@@ -141,15 +142,14 @@ void handleSerial()
       case 'I': 
       {
           onewire.skip();
-          Serial.write(byte(0x01));
-      }
+          Serial.write(SUCCESS_BYTE);
       break;
 
       // DEPOWER
       case 'J': 
       {
           onewire.depower();
-          Serial.write(byte(0x01));
+          Serial.write(SUCCESS_BYTE);
       }
       break;
 
@@ -157,41 +157,66 @@ void handleSerial()
       case 'K': 
       {
           onewire.reset_search();
-          Serial.write(byte(0x01));
+          Serial.write(SUCCESS_BYTE);
       }
       break;
 
       // PERFORM A 1-WIRE SEARCH
       case 'L': 
       {
-            char addr[8];
-              for (int i = 0; i < strlen(addr); i++) addr[i] = '\0';
-            if (onewire.search(addr, true))
-            {
-              Serial.write(byte(0x01));
-              Serial.write(addr, 8);
-            }
-            else
-              Serial.write(byte(0xFF));
+          char addr[8];
+            for (int i = 0; i < strlen(addr); i++) addr[i] = '\0';
+          if (onewire.search(addr, true))
+          {
+            Serial.write(SUCCESS_BYTE);
+            Serial.write(addr, 8);
+          }
+          else
+            Serial.write(ERROR_BYTE);
       }
       break;
 
-      /* // the rest are CRC checks
-      case 'M': {
-
+      // COMPUTE DS 8 bit CRC
+      case 'M': 
+      {
+        char crc = 0;
+        if (strlen(incomingMessage) > 2)
+        {
+          if (incomingMessage[1] <= 14)
+          {
+            crc = onewire.crc8(incomingMessage+2, incomingMessage[1]);
+            Serial.write(byte(crc));
+          }
+          else
+            Serial.write(ERROR_BYTE);
         }
+        else
+          Serial.write(ERROR_BYTE);
+      }
       break;
 
-      case 'N': {
-
+      /* // COMPUTE DS 16 bit CRC
+      case 'N': 
+      {
+        uint16_t crc;
+        if (strlen(incomingMessage) > 2)
+        {
+          if (incomingMessage[1] <= 14)
+          {
+            crc = onewire.crc16(incomingMessage+2, incomingMessage[1]);
+            Serial.write(crc);
+          }
+          else
+            Serial.write(byte(0xFF));
         }
-      break;
+        else
+          Serial.write(byte(0xFF));
+      }
+      break; */
 
-      case 'O': {
-
-        }
+      default:
+        Serial.write(ERROR_BYTE);
       break;
-      */
     }
       clear_message(incomingMessage);
   }
