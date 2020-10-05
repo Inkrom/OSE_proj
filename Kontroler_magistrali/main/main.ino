@@ -11,7 +11,7 @@ void setup()
   // put your setup code here, to run once:
   while (!Serial);
   Serial.begin(115200);
-  Serial.setTimeout(1000);
+  Serial.setTimeout(250);
 }
 
 void loop() 
@@ -164,17 +164,15 @@ void handleSerial()
       // PERFORM A 1-WIRE SEARCH
       case 'L': 
       {
-          if (strlen(incomingMessage) == 9) 
-          {
             char addr[8];
               for (int i = 0; i < strlen(addr); i++) addr[i] = '\0';
-            strncpy(addr, incomingMessage+1, 8);
-            onewire.search(addr, true);
-            Serial.write(byte(0x01));
-
-          }
-          else
-            Serial.write(byte(0xFF));
+            if (onewire.search(addr, true))
+            {
+              Serial.write(byte(0x01));
+              Serial.write(addr, 8);
+            }
+            else
+              Serial.write(byte(0xFF));
       }
       break;
 
