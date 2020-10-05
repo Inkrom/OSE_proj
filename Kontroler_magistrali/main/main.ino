@@ -72,7 +72,7 @@ void handleSerial()
             Serial.write(incomingMessage[1]);
           }
           else 
-            Serial.write());
+            Serial.write(ERROR_BYTE);
       }
       break;
 
@@ -143,6 +143,7 @@ void handleSerial()
       {
           onewire.skip();
           Serial.write(SUCCESS_BYTE);
+      }
       break;
 
       // DEPOWER
@@ -215,7 +216,9 @@ void handleSerial()
       break; */
 
       default:
+      {
         Serial.write(ERROR_BYTE);
+      }
       break;
     }
       clear_message(incomingMessage);
