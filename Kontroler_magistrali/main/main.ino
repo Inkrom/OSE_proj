@@ -7,6 +7,7 @@ char incomingMessage[MESSAGE_LENGTH];
 char outgoingMessage[MESSAGE_LENGTH];
 const byte ERROR_BYTE = byte(0xFF);
 const byte SUCCESS_BYTE = byte(0x01);
+const byte TERM_CHAR = byte(0x58);
 
 void setup() 
 {
@@ -36,6 +37,7 @@ void handleSerial()
       {
           uint8_t response = onewire.reset();
           Serial.write(response);
+          Serial.write(TERM_CHAR);
       }
       break;
 
@@ -46,10 +48,12 @@ void handleSerial()
           {
             onewire.write_bit(uint8_t(incomingMessage[1]));
             Serial.write(SUCCESS_BYTE);
+            Serial.write(TERM_CHAR);
           }
           else 
           {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
           }
       }
       break;
@@ -60,6 +64,7 @@ void handleSerial()
           byte data;
           data = onewire.read_bit();
           Serial.write(data);
+          Serial.write(TERM_CHAR);
       }
       break;
 
@@ -70,9 +75,13 @@ void handleSerial()
           {
             onewire.write(uint8_t(incomingMessage[1]), 0);
             Serial.write(incomingMessage[1]);
+            Serial.write(TERM_CHAR);
           }
-          else 
+          else
+          {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
+          }
       }
       break;
 
@@ -88,9 +97,13 @@ void handleSerial()
           }
           else 
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
         }
         else 
+        {
           Serial.write(ERROR_BYTE);
+          Serial.write(TERM_CHAR);
+        }
       }
       break;
 
@@ -115,10 +128,16 @@ void handleSerial()
             Serial.write(SUCCESS_BYTE);
           }
           else
+          {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
+          }
         }
         else
+        {
           Serial.write(ERROR_BYTE);
+          Serial.write(TERM_CHAR);
+        }
       }
       break;
 
@@ -131,10 +150,14 @@ void handleSerial()
               for (int i = 0; i < strlen(rom); i++) rom[i] = '\0';
             strncpy(rom, incomingMessage+1, 8);
             Serial.write(SUCCESS_BYTE);
+            Serial.write(TERM_CHAR);
             onewire.select(rom);
           }
           else
+          {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
+          }
       }
       break;
 
@@ -143,6 +166,7 @@ void handleSerial()
       {
           onewire.skip();
           Serial.write(SUCCESS_BYTE);
+          Serial.write(TERM_CHAR);
       }
       break;
 
@@ -151,6 +175,7 @@ void handleSerial()
       {
           onewire.depower();
           Serial.write(SUCCESS_BYTE);
+          Serial.write(TERM_CHAR);
       }
       break;
 
@@ -159,6 +184,7 @@ void handleSerial()
       {
           onewire.reset_search();
           Serial.write(SUCCESS_BYTE);
+          Serial.write(TERM_CHAR);
       }
       break;
 
@@ -171,9 +197,13 @@ void handleSerial()
           {
             Serial.write(SUCCESS_BYTE);
             Serial.write(addr, 8);
+            Serial.write(TERM_CHAR);
           }
           else
+          {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
+          }
       }
       break;
 
@@ -187,12 +217,19 @@ void handleSerial()
           {
             crc = onewire.crc8(incomingMessage+2, incomingMessage[1]);
             Serial.write(byte(crc));
+            Serial.write(TERM_CHAR);
           }
           else
+          {
             Serial.write(ERROR_BYTE);
+            Serial.write(TERM_CHAR);
+          }
         }
         else
+        {
           Serial.write(ERROR_BYTE);
+          Serial.write(TERM_CHAR);
+        }
       }
       break;
 
@@ -218,6 +255,7 @@ void handleSerial()
       default:
       {
         Serial.write(ERROR_BYTE);
+        Serial.write(TERM_CHAR);
       }
       break;
     }
