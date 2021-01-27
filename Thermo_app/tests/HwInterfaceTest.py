@@ -4,7 +4,7 @@ from hardwareinterface.HwInterface import HwInterface
 
 hardWareInt = HwInterface() # passing no args sets calss-wide attribute 'port' to 'None'
 
-hardWareInt.port = '/dev/ttyUSB0' # sets class-wide 'port' attr. outside of the constructor
+hardWareInt.port = 'COM6' # sets class-wide 'port' attr. outside of the constructor
 
 hardWareInt.openComm() # opens communication port
 #hardWareInt.openComm() # tries to open the same instance the second time

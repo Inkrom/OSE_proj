@@ -38,16 +38,16 @@ class HwInterface:
             else:
                 for obj in list:
                     if self.port in obj.device:
-                        #print("DEBUG: Initializing communication port...")
+                        print("DEBUG: Initializing communication port...")
                         self.ser.port = self.port
                         self.ser.baudrate = HwInterface.baud
                         self.ser.bytesize = HwInterface.dataBits
                         self.ser.parity = HwInterface.parity
                         self.ser.stopbits = HwInterface.stopBits
                         self.ser.open()
-                        #print("DEBUG: Done!")
-                    else:
-                        print("ERR: Sepcified port name not found in system resources!")
+                        print("DEBUG: Done!")
+                    #else:
+                        #print("ERR: Sepcified port name not found in system resources!")
         else:
             print("ERR: Serial communication already opened on:", self.port)
         # TODO: try except clause!
